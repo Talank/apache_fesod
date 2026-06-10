@@ -18,14 +18,12 @@
 name: Fuzz Tests (daily)
 
 on:
-  schedule:
-    - cron: '0 16 * * *' # Runs daily at 00:00 GMT+8
   workflow_dispatch:
 
 jobs:
   fuzz:
-    if: (github.event_name == 'schedule' && github.repository == 'apache/fesod') || (github.event_name != 'schedule')
-    runs-on: ubuntu-latest
+    if: always()
+    runs-on: ${{ matrix.os }}
     timeout-minutes: 360
     env:
       # Enable Jazzer JUnit mode for fuzz testing, avoiding complex binary target command line configuration
@@ -59,3 +57,10 @@ jobs:
           name: jazzer-artifacts
           path: ${{ runner.temp }}/jazzer-artifacts/
           if-no-files-found: ignore
+    strategy:
+      matrix:
+        os:
+          - ubuntu-latest
+          - windows-latest
+          - macos-latest
+      fail-fast: false

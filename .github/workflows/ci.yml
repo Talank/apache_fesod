@@ -18,21 +18,7 @@
 name: Java CI
 
 on:
-  pull_request:
-    branches: [ main ]
-    paths-ignore:
-      - 'website/**'
-      - '**.md'
-      - 'LICENSE'
-      - 'NOTICE'
-  push:
-    branches: [ main ]
-    paths-ignore:
-      - 'website/**'
-      - '**.md'
-      - 'LICENSE'
-      - 'NOTICE'
-
+  workflow_dispatch:
 concurrency:
   group: ci-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
@@ -43,7 +29,7 @@ permissions:
 
 jobs:
   check:
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v5
       - name: Cache Local Maven Repository
@@ -61,12 +47,23 @@ jobs:
       - name: Check code style
         run: ./mvnw spotless:check
 
-  test:
-    runs-on: ubuntu-24.04
     strategy:
       matrix:
-        java: [ 8, 11, 17, 21, 25 ]
-        distribution: [ 'temurin' ]
+        os:
+          - ubuntu-latest
+          - windows-latest
+          - macos-latest
+      fail-fast: false
+  test:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        java: [8, 11, 17, 21, 25]
+        distribution: ['temurin']
+        os:
+          - ubuntu-latest
+          - windows-latest
+          - macos-15-intel
       fail-fast: false
       max-parallel: 5
 
@@ -86,10 +83,11 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-m2
       - name: Test with Maven
-        run: ./mvnw clean package -B -Dmaven.test.skip=false -pl fesod-common,fesod-shaded,fesod-sheet,fesod-examples/fesod-sheet-examples
+        run: ./mvnw clean package -B -Dmaven.test.skip=false -pl 
+          fesod-common,fesod-shaded,fesod-sheet,fesod-examples/fesod-sheet-examples
       - name: Publish Unit Test Results
         uses: EnricoMi/publish-unit-test-result-action@v2
-        if: (!cancelled())
+        if: always()
         with:
           files: "**/target/surefire-reports/*.xml"
       - name: Maven Build
