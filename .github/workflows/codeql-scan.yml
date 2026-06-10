@@ -18,22 +18,14 @@
 name: CodeQL Security Scan
 
 on:
-  push:
-    branches:
-      - master
-      - main
-  pull_request:
-    types: [opened, synchronize, reopened]
-  schedule:
-    - cron: '0 0 * * *' # 每天0点自动扫描
-
+  workflow_dispatch:
 concurrency:
   group: codeql-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
 jobs:
   codeql:
-    if: (github.event_name == 'schedule' && github.repository == 'apache/fesod') || (github.event_name != 'schedule')
+    if: always()
     name: CodeQL Analysis
     runs-on: ubuntu-latest
     permissions:
@@ -43,7 +35,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        language: [ 'java' ]
+        language: ['java']
     steps:
       - name: Checkout repository
         uses: actions/checkout@v5

@@ -18,13 +18,11 @@
 name: Fuzz Tests (daily)
 
 on:
-  schedule:
-    - cron: '0 16 * * *' # Runs daily at 00:00 GMT+8
   workflow_dispatch:
 
 jobs:
   fuzz:
-    if: (github.event_name == 'schedule' && github.repository == 'apache/fesod') || (github.event_name != 'schedule')
+    if: always()
     runs-on: ubuntu-latest
     timeout-minutes: 360
     env:
@@ -59,3 +57,5 @@ jobs:
           name: jazzer-artifacts
           path: ${{ runner.temp }}/jazzer-artifacts/
           if-no-files-found: ignore
+    strategy:
+      fail-fast: false
