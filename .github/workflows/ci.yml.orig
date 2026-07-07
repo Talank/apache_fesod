@@ -83,8 +83,6 @@ jobs:
       - name: Test with Maven
         run: ./mvnw clean package -B -Dmaven.test.skip=false -pl 
           fesod-common,fesod-shaded,fesod-sheet,fesod-examples/fesod-sheet-examples
-        env:
-          MAVEN_OPTS: ${{ runner.arch == 'ARM64' && '-Djazzer.disabled=true' || '' }}
       - name: Publish Unit Test Results
         uses: EnricoMi/publish-unit-test-result-action@v2
         if: always()
@@ -92,7 +90,5 @@ jobs:
           files: "**/target/surefire-reports/*.xml"
       - name: Maven Build
         run: ./mvnw install -B -V
-        env:
-          MAVEN_OPTS: ${{ runner.arch == 'ARM64' && '-Djazzer.disabled=true' || '' }}
       - name: Java Doc
         run: ./mvnw javadoc:javadoc
